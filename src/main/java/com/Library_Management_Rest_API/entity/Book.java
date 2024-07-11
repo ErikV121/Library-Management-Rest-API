@@ -14,16 +14,19 @@ public class Book extends BaseEntity {
     private String isbn;
     @Column
     private String publisher;
+    @Column
+    private boolean available;
 
     public Book(){
 
     }
 
-    public Book(String title, String author, String isbn, String publisher) {
+    public Book(String title, String author, String isbn, String publisher,boolean available) {
         this.title = title;
         this.author = author;
         this.isbn = isbn;
         this.publisher = publisher;
+        this.available = available;
     }
 
     public String getTitle() {
@@ -56,5 +59,13 @@ public class Book extends BaseEntity {
 
     public void setPublisher(String publisher) {
         this.publisher = publisher;
+    }
+
+    public boolean isAvailable() {
+        return available;
+    }
+
+    public void setAvailable(boolean available) {
+        this.available = available;
     }
 }
