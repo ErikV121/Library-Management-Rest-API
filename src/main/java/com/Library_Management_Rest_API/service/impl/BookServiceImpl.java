@@ -1,13 +1,15 @@
 package com.Library_Management_Rest_API.service.impl;
 
 import com.Library_Management_Rest_API.entity.Book;
+import com.Library_Management_Rest_API.exception.ResourceAlreadyExistsException;
+import com.Library_Management_Rest_API.exception.ResourceNotFoundException;
 import com.Library_Management_Rest_API.payload.BookDto;
 import com.Library_Management_Rest_API.repository.BookRepository;
 import com.Library_Management_Rest_API.service.BookService;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class BookServiceImpl implements BookService {
@@ -18,38 +20,42 @@ public class BookServiceImpl implements BookService {
         this.bookRepository = bookRepository;
         this.modelMapper = modelMapper;
     }
-
     @Override
     public BookDto createBook(BookDto bookDto) {
-//        Book book = maptoBook(bookDto);
-//        Book savedBook = bookRepository.save(book);
-//        return maptoBookDto(savedBook);
+        if(bookRepository.findByIsbn(bookDto.getIsbn()).isPresent()){
+            throw new ResourceAlreadyExistsException("Book","id", bookDto.getIsbn());
+        }
+
         return maptoBookDto(bookRepository.save(maptoBook(bookDto)));
     }
-    //TODO: impelement business logic for get,update and delete
     @Override
-    public BookDto getBookById(long id) {
-        return null;
+    public BookDto getBookById(Long id) {
+        Book book = bookRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Book","id",id));
+        return maptoBookDto(book);
     }
 
     @Override
     public BookDto getBookByIsbn(String isbn) {
+        Book book = bookRepository.findByIsbn(isbn).orElseThrow(() -> new ResourceNotFoundException("Book","isbn",isbn));
+        return maptoBookDto(book);
+    }
+
+    @Override
+    public List<BookDto> getBooksByTitle(String title) {
+        List<Book> books = bookRepository.findByTitleContainingIgnoreCase(title);
+        return books.stream()
+                .map(this::maptoBookDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public BookDto updateBook(Long id, BookDto bookDto) {
         return null;
     }
 
     @Override
-    public List<BookDto> getAllBooks() {
-        return List.of();
-    }
-
-    @Override
-    public BookDto updateBook(BookDto bookDto) {
-        return null;
-    }
-
-    @Override
-    public void deleteBookById(long id) {
-
+    public void deleteBookById(Long id) {
+        bookRepository.deleteById(id);
     }
 
     //model mapper
